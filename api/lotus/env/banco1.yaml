@@ -1,0 +1,26 @@
+replicaCount: 10
+
+image:
+  repository: luizlipefs/server
+  tag: "1.0.1"
+  pullPolicy: IfNotPresent
+
+service:
+  name: lotus-service
+  type: ClusterIP
+  port: 3005
+  targetPort: 3005
+
+env:
+  name: banco1
+
+jobs:
+  repository: luizlipefs/jobs
+  tag: "1.0.4"
+  list:
+    - name: renovacao-cesta
+      entrypoint: renovacao-cesta
+      cron: "* * * * *"
+    - name: transacoes-pendentes
+      entrypoint: transacoes-pendentes
+      cron: "*/2 * * * *"

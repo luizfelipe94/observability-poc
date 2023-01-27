@@ -1,0 +1,6 @@
+FROM node:alpine
+COPY . /app
+WORKDIR /app
+
+COPY jobs-entrypoint.sh /usr/local/bin/
+entrypoint ["jobs-entrypoint.sh"]

@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name:  lotus-job-pending-transactions
+  namespace: maas-lotus-jobs
+  labels:
+    app: maas-lotus
+
+spec:
+  schedule: "* * * * *"
+  successfulJobsHistoryLimit: 10
+  failedJobsHistoryLimit: 15
+
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: renovacao-cesta
+            image: luizlipefs/jobs:1.0.2
+            args: ["renovacao-cesta"]
+            imagePullPolicy: Always
+          restartPolicy: OnFailure

@@ -1,0 +1,27 @@
+{{- $root := . -}}
+{{- range $job := .Values.jobs.list }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name:  "{{ $root.Release.Name }}-lotus-job-{{ $job.name }}"
+  namespace: {{ $root.Release.Name }}
+  labels:
+    app: lotus-jobs
+spec:
+  schedule: "{{ $job.cron }}"
+  successfulJobsHistoryLimit: 10
+  failedJobsHistoryLimit: 15
+
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: "{{ $job.name }}"
+            image: "{{ $root.Values.jobs.repository }}:{{ $root.Values.jobs.tag }}"
+            args: ["{{ $job.entrypoint }}"]
+            imagePullPolicy: Always
+          restartPolicy: OnFailure
+---
+{{- end }}

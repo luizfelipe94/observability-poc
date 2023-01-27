@@ -1,0 +1,22 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server",
+    "job:renovacao-cesta": "node jobs/renovacaoCesta",
+    "job:transacoes-pendentes": "node jobs/transacoesPendentes"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-prometheus-middleware": "^1.2.0",
+    "i": "^0.3.7",
+    "npm": "^9.3.1",
+    "uuid": "^9.0.0",
+    "winston": "^3.8.2"
+  }
+}

@@ -1,0 +1,85 @@
+version: "3.3"
+
+services:
+    prometheus:
+        image: prom/prometheus
+        volumes:
+            - ./prometheus:/etc/prometheus/
+            - prometheus_data:/var/lib/prometheus
+        networks:
+            - backend
+        ports:
+            - 9090:9090
+
+    alertmanager:
+        image: prom/alertmanager
+        volumes:
+            - ./alertmanager:/etc/alertmanager/
+        networks:
+            - backend
+        ports:
+            - 9093:9093
+
+    grafana:
+        image: grafana/grafana
+        depends_on:
+            - prometheus
+        volumes:
+            - grafana_data:/var/lib/grafana
+            - ./grafana/provisioning:/etc/grafana/provisioning
+        env_file:
+            - ./grafana/grafana.config
+        networks:
+            - backend
+        ports:
+            - 3000:3000
+
+    loki:
+        image: grafana/loki
+        ports:
+            - 3100:3100
+        volumes:
+            - ./loki/loki.yaml:/etc/config/loki.yaml
+            - loki_data:/loki
+        entrypoint:
+            - /usr/bin/loki
+            - -config.file=/etc/config/loki.yaml
+        networks:
+            - backend
+        depends_on:
+            - createbuckets
+
+    minio:
+        image: minio/minio
+        ports:
+            - "9000:9000"
+            - "9001:9001"
+        networks:
+            - backend
+        command: server ~ --address ':9000' --console-address ':9001'
+        environment:
+            - MINIO_ACCESS_KEY=697d0993dd097f38d5b8
+            - MINIO_SECRET_KEY=9f88738761b57c63f6a81bdfd471
+
+    createbuckets:
+        image: minio/mc
+        networks:
+            - backend
+        depends_on:
+            - minio
+        entrypoint: >
+            /bin/sh -c "
+            /usr/bin/mc config host add myminio http://minio:9000 697d0993dd097f38d5b8 9f88738761b57c63f6a81bdfd471;
+            /usr/bin/mc rm -r --force myminio/loki;
+            /usr/bin/mc mb myminio/loki;
+            /usr/bin/mc policy set public myminio/loki;
+            exit 0;
+            "
+
+networks:
+    backend:
+
+volumes:
+    prometheus_data:
+    grafana_data:
+    loki_data:
